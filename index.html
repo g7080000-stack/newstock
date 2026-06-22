@@ -3,7 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
   <title>소셜 투자 리그 MVP</title>
+  <script>
+    (() => {
+      try {
+        const savedTheme = localStorage.getItem("theme");
+        const systemTheme = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = savedTheme || systemTheme;
+      } catch {
+        document.documentElement.dataset.theme = "light";
+      }
+    })();
+  </script>
 
   <style>
     * {
@@ -467,6 +479,92 @@
       font-size: 13px;
       margin-bottom: 14px;
     }
+
+    .theme-actions { display: flex; align-items: center; gap: 8px; }
+
+    .theme-toggle {
+      width: 36px;
+      height: 36px;
+      border: 1px solid #dde2e7;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #f8fafc;
+      color: #141414;
+      font-size: 17px;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .theme-toggle:hover { transform: translateY(-1px); }
+    .theme-toggle:focus-visible { outline: 3px solid rgba(10, 124, 255, 0.3); outline-offset: 2px; }
+
+    [data-theme="dark"] body { background: #080b10; color: #f4f6f8; }
+
+    [data-theme="dark"] .app,
+    [data-theme="dark"] .top-bar,
+    [data-theme="dark"] .bottom-nav { background: #0f1319; }
+
+    [data-theme="dark"] .app { box-shadow: 0 0 30px rgba(0, 0, 0, 0.45); }
+
+    [data-theme="dark"] .top-bar,
+    [data-theme="dark"] .bottom-nav,
+    [data-theme="dark"] .holding-row { border-color: #252c36; }
+
+    [data-theme="dark"] .card,
+    [data-theme="dark"] .metric { background: #151a22; border-color: #29313d; }
+
+    [data-theme="dark"] .league-card,
+    [data-theme="dark"] .rank-row,
+    [data-theme="dark"] .trade-box,
+    [data-theme="dark"] .feed-item { background: #11161e; border-color: #29313d; }
+
+    [data-theme="dark"] .hero-card { background: linear-gradient(135deg, #1b2433, #111722); }
+
+    [data-theme="dark"] .portfolio-summary {
+      background: #05070a;
+      border: 1px solid #29313d;
+    }
+
+    [data-theme="dark"] .ghost-btn,
+    [data-theme="dark"] .form-row input,
+    [data-theme="dark"] .form-row select {
+      background: #171d26;
+      color: #f4f6f8;
+      border-color: #343d4a;
+    }
+
+    [data-theme="dark"] .rule-chip { background: #232a35; color: #dce1e8; }
+
+    [data-theme="dark"] .notice {
+      background: #29230e;
+      color: #ffe58a;
+      border-color: #554715;
+    }
+
+    [data-theme="dark"] .status-badge,
+    [data-theme="dark"] .league-tag,
+    [data-theme="dark"] .feed-type { background: #142941; color: #6eb5ff; }
+
+    [data-theme="dark"] .sub-text,
+    [data-theme="dark"] .league-meta,
+    [data-theme="dark"] .metric span,
+    [data-theme="dark"] .rank-team,
+    [data-theme="dark"] .holding-detail,
+    [data-theme="dark"] .feed-time,
+    [data-theme="dark"] .nav-btn { color: #9aa5b5; }
+
+    [data-theme="dark"] .nav-btn.active { color: #ffffff; }
+
+    [data-theme="dark"] .theme-toggle {
+      background: #202733;
+      color: #ffffff;
+      border-color: #343d4a;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0.01ms !important; }
+    }
   </style>
 </head>
 
@@ -474,7 +572,10 @@
   <div class="app">
     <header class="top-bar">
       <div class="logo">투자리그</div>
-      <div class="status-badge">MVP Demo</div>
+      <div class="theme-actions">
+        <div class="status-badge">MVP Demo</div>
+        <button class="theme-toggle" type="button" aria-label="다크 모드로 전환" aria-pressed="false">☾</button>
+      </div>
     </header>
 
     <!-- 홈 -->
@@ -801,6 +902,27 @@
   </div>
 
   <script>
+    const themeToggle = document.querySelector(".theme-toggle");
+
+    function updateThemeToggle(theme) {
+      const isDark = theme === "dark";
+      themeToggle.textContent = isDark ? "☀" : "☾";
+      themeToggle.setAttribute("aria-pressed", String(isDark));
+      themeToggle.setAttribute("aria-label", isDark ? "화이트 모드로 전환" : "다크 모드로 전환");
+    }
+
+    function toggleTheme() {
+      const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = nextTheme;
+      try {
+        localStorage.setItem("theme", nextTheme);
+      } catch {}
+      updateThemeToggle(nextTheme);
+    }
+
+    themeToggle.addEventListener("click", toggleTheme);
+    updateThemeToggle(document.documentElement.dataset.theme || "light");
+
     function goPage(pageId, btn) {
       const pages = document.querySelectorAll(".page");
       pages.forEach((page) => page.classList.remove("active"));
